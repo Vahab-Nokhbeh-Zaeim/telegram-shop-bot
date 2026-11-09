@@ -1,0 +1,6 @@
+[
+  {"id": "mouse", "name": "Wireless Mouse", "price": 850000, "stock": 12},
+  {"id": "keyboard", "name": "Mechanical Keyboard", "price": 3200000, "stock": 5},
+  {"id": "headset", "name": "Gaming Headset", "price": 2100000, "stock": 8},
+  {"id": "webcam", "name": "HD Webcam", "price": 1450000, "stock": 0}
+]

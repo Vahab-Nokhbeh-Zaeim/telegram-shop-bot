@@ -31,3 +31,10 @@ class Catalog:
 
     def get(self, product_id: str) -> Product | None:
         return self._products.get(product_id)
+
+    def search(self, text: str) -> list[Product]:
+        """Return products whose name contains the text (case-insensitive)."""
+        query = text.strip().lower()
+        if not query:
+            return []
+        return [product for product in self._products.values() if query in product.name.lower()]

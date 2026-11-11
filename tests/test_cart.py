@@ -40,6 +40,12 @@ class CartTests(unittest.TestCase):
         self.carts.clear(1)
         self.assertTrue(self.carts.is_empty(1))
 
+    def test_catalog_search(self) -> None:
+        catalog = make_catalog()
+        self.assertEqual([p.id for p in catalog.search("MOUSE")], ["mouse"])
+        self.assertEqual(catalog.search("  "), [])
+        self.assertEqual(catalog.search("keyboard"), [])
+
     def test_format_price(self) -> None:
         self.assertEqual(format_price(1250000), "1,250,000 Toman")
 

@@ -50,6 +50,26 @@ class ShopBotTests(unittest.TestCase):
         actions = self.bot.handle(text_update(1, "/start@my_shop_bot"))
         self.assertIn("Welcome", actions[0].params["text"])
 
+    def test_search_finds_products_case_insensitively(self) -> None:
+        action = self.bot.handle(text_update(1, "/search MOU"))[0]
+        self.assertIn("Mouse", action.params["text"])
+        buttons = action.params["reply_markup"]["inline_keyboard"]
+        self.assertEqual(buttons[0][0]["callback_data"], "add:mouse")
+
+    def test_search_shows_out_of_stock_without_button(self) -> None:
+        action = self.bot.handle(text_update(1, "/search webcam"))[0]
+        self.assertIn("out of stock", action.params["text"])
+        self.assertNotIn("reply_markup", action.params)
+
+    def test_search_without_query_shows_usage(self) -> None:
+        action = self.bot.handle(text_update(1, "/search"))[0]
+        self.assertIn("Usage", action.params["text"])
+
+    def test_search_with_no_results(self) -> None:
+        action = self.bot.handle(text_update(1, "/search <laptop>"))[0]
+        self.assertIn("No products found", action.params["text"])
+        self.assertIn("&lt;laptop&gt;", action.params["text"])
+
     def test_unknown_command(self) -> None:
         actions = self.bot.handle(text_update(1, "hello"))
         self.assertIn("did not understand", actions[0].params["text"])

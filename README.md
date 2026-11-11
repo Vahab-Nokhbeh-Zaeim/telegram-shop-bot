@@ -10,6 +10,7 @@ Built with **pure Python 3.12** and the Telegram Bot API, with **no third-party 
 
 - Product catalog loaded from a JSON file
 - Inline "Add to cart" buttons for products in stock
+- Product search by name
 - Per-user carts with stock validation
 - Checkout with order numbers and an order summary
 - Order notifications sent to an admin chat
@@ -22,6 +23,7 @@ Built with **pure Python 3.12** and the Telegram Bot API, with **no third-party 
 |---|---|
 | `/start` | Welcome message and list of commands |
 | `/catalog` | Browse products and add them to the cart |
+| `/search <name>` | Find products by name (case-insensitive) |
 | `/cart` | View the cart and total price |
 | `/checkout` | Place the order |
 | `/clear` | Empty the cart |

@@ -4,6 +4,7 @@ Handlers return a list of actions instead of calling the API directly,
 which keeps the business logic independent from the network and easy to test.
 """
 
+import html
 from dataclasses import dataclass, field
 from itertools import count
 
@@ -46,6 +47,7 @@ class ShopBot:
             "/cart": self._cart,
             "/checkout": self._checkout,
             "/clear": self._clear,
+            "/search": self._search,
         }
         handler = routes.get(command, self._unknown)
         return handler(chat_id, msg)
@@ -55,6 +57,7 @@ class ShopBot:
         text = (
             f"Hi {name}! 👋 Welcome to the shop.\n\n"
             "/catalog – browse products\n"
+            "/search &lt;name&gt; – find a product\n"
             "/cart – view your cart\n"
             "/checkout – place your order\n"
             "/clear – empty your cart"
@@ -65,6 +68,23 @@ class ShopBot:
         keyboard = []
         lines = ["<b>Products</b>"]
         for product in self.catalog.all():
+            status = format_price(product.price) if product.in_stock else "out of stock"
+            lines.append(f"• {product.name} – {status}")
+            if product.in_stock:
+                keyboard.append([{"text": f"Add {product.name}", "callback_data": f"add:{product.id}"}])
+        return [message(chat_id, "\n".join(lines), keyboard)]
+
+    def _search(self, chat_id: int, msg: dict) -> list[Action]:
+        parts = (msg.get("text") or "").split(maxsplit=1)
+        if len(parts) < 2:
+            return [message(chat_id, "Usage: /search mouse")]
+        query = html.escape(parts[1])
+        results = self.catalog.search(parts[1])
+        if not results:
+            return [message(chat_id, f"No products found for “{query}”.")]
+        lines = [f"<b>Results for “{query}”</b>"]
+        keyboard = []
+        for product in results:
             status = format_price(product.price) if product.in_stock else "out of stock"
             lines.append(f"• {product.name} – {status}")
             if product.in_stock:

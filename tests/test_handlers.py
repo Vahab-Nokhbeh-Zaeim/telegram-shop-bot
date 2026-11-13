@@ -61,6 +61,31 @@ class ShopBotTests(unittest.TestCase):
         self.assertIn("out of stock", action.params["text"])
         self.assertNotIn("reply_markup", action.params)
 
+    def test_search_lists_every_matching_product(self) -> None:
+        catalog = Catalog([
+            Product("mouse", "Wireless Mouse", 100, 2),
+            Product("pad", "Mouse Pad", 20, 4),
+            Product("cam", "Webcam", 500, 1),
+        ])
+        action = ShopBot(catalog).handle(text_update(1, "/search mouse"))[0]
+        self.assertIn("Wireless Mouse", action.params["text"])
+        self.assertIn("Mouse Pad", action.params["text"])
+        self.assertNotIn("Webcam", action.params["text"])
+        self.assertEqual(len(action.params["reply_markup"]["inline_keyboard"]), 2)
+
+    def test_search_keeps_multi_word_queries(self) -> None:
+        catalog = Catalog([Product("pad", "Mouse Pad", 20, 4), Product("mouse", "Mouse", 100, 2)])
+        action = ShopBot(catalog).handle(text_update(1, "/search   mouse pad  "))[0]
+        self.assertIn("Mouse Pad", action.params["text"])
+        self.assertEqual(len(action.params["reply_markup"]["inline_keyboard"]), 1)
+
+    def test_search_result_button_adds_to_cart(self) -> None:
+        action = self.bot.handle(text_update(1, "/search mouse"))[0]
+        product_id = action.params["reply_markup"]["inline_keyboard"][0][0]["callback_data"].removeprefix("add:")
+        self.bot.handle(add_update(1, product_id))
+        cart = self.bot.handle(text_update(1, "/cart"))[0]
+        self.assertIn("Mouse × 1", cart.params["text"])
+
     def test_search_without_query_shows_usage(self) -> None:
         action = self.bot.handle(text_update(1, "/search"))[0]
         self.assertIn("Usage", action.params["text"])

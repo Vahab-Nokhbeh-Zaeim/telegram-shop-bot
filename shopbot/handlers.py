@@ -67,11 +67,13 @@ class ShopBot:
     def _catalog(self, chat_id: int, msg: dict) -> list[Action]:
         keyboard = []
         lines = ["<b>Products</b>"]
-        for product in self.catalog.all():
-            status = format_price(product.price) if product.in_stock else "out of stock"
-            lines.append(f"• {product.name} – {status}")
-            if product.in_stock:
-                keyboard.append([{"text": f"Add {product.name}", "callback_data": f"add:{product.id}"}])
+        for category in self.catalog.categories():
+            lines.append(f"\n<b>{html.escape(category)}</b>")
+            for product in self.catalog.by_category(category):
+                status = format_price(product.price) if product.in_stock else "out of stock"
+                lines.append(f"• {product.name} – {status}")
+                if product.in_stock:
+                    keyboard.append([{"text": f"Add {product.name}", "callback_data": f"add:{product.id}"}])
         return [message(chat_id, "\n".join(lines), keyboard)]
 
     def _search(self, chat_id: int, msg: dict) -> list[Action]:

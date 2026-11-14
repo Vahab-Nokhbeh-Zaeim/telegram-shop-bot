@@ -46,6 +46,23 @@ class CartTests(unittest.TestCase):
         self.assertEqual(catalog.search("  "), [])
         self.assertEqual(catalog.search("keyboard"), [])
 
+    def test_categories_keep_first_seen_order(self) -> None:
+        catalog = Catalog([
+            Product("a", "A", 1, 1, "Audio"),
+            Product("b", "B", 1, 1, "Accessories"),
+            Product("c", "C", 1, 1, "Audio"),
+        ])
+        self.assertEqual(catalog.categories(), ["Audio", "Accessories"])
+        self.assertEqual([p.id for p in catalog.by_category("audio")], ["a", "c"])
+
+    def test_product_without_category_defaults_to_other(self) -> None:
+        self.assertEqual(Product("x", "X", 1, 1).category, "Other")
+
+    def test_sample_catalog_file_loads(self) -> None:
+        from pathlib import Path
+        catalog = Catalog.from_file(Path(__file__).resolve().parent.parent / "data" / "products.json")
+        self.assertIn("Accessories", catalog.categories())
+
     def test_format_price(self) -> None:
         self.assertEqual(format_price(1250000), "1,250,000 Toman")
 

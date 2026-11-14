@@ -26,6 +26,16 @@ class ShopBotTests(unittest.TestCase):
         buttons = action.params["reply_markup"]["inline_keyboard"]
         self.assertEqual([row[0]["callback_data"] for row in buttons], ["add:mouse"])
 
+    def test_catalog_groups_products_by_category(self) -> None:
+        catalog = Catalog([
+            Product("mouse", "Mouse", 100, 5, "Accessories"),
+            Product("speaker", "Speaker", 300, 2, "Audio"),
+            Product("pad", "Mouse Pad", 20, 3, "Accessories"),
+        ])
+        text = ShopBot(catalog).handle(text_update(1, "/catalog"))[0].params["text"]
+        self.assertLess(text.index("<b>Accessories</b>"), text.index("Mouse Pad"))
+        self.assertLess(text.index("Mouse Pad"), text.index("<b>Audio</b>"))
+
     def test_add_button_puts_product_in_cart(self) -> None:
         answer = self.bot.handle(add_update(1, "mouse"))[0]
         self.assertEqual(answer.method, "answer_callback")

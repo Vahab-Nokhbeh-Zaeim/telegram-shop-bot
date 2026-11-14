@@ -11,6 +11,7 @@ class Product:
     name: str
     price: int
     stock: int
+    category: str = "Other"
 
     @property
     def in_stock(self) -> bool:
@@ -31,6 +32,14 @@ class Catalog:
 
     def get(self, product_id: str) -> Product | None:
         return self._products.get(product_id)
+
+    def categories(self) -> list[str]:
+        """Category names in the order they first appear in the catalog."""
+        return list(dict.fromkeys(product.category for product in self._products.values()))
+
+    def by_category(self, category: str) -> list[Product]:
+        wanted = category.strip().lower()
+        return [product for product in self._products.values() if product.category.lower() == wanted]
 
     def search(self, text: str) -> list[Product]:
         """Return products whose name contains the text (case-insensitive)."""

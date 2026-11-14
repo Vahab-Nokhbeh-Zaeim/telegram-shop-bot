@@ -8,7 +8,7 @@ Built with **pure Python 3.12** and the Telegram Bot API, with **no third-party 
 
 ## Features
 
-- Product catalog loaded from a JSON file
+- Product catalog loaded from a JSON file, grouped by category
 - Inline "Add to cart" buttons for products in stock
 - Product search by name
 - Per-user carts with stock validation
@@ -48,7 +48,13 @@ On Windows PowerShell use `$env:BOT_TOKEN="your-token"`.
 python -m shopbot
 ```
 
-Products live in `data/products.json`; edit it or point `CATALOG_PATH` to your own file.
+Products live in `data/products.json`; edit it or point `CATALOG_PATH` to your own file:
+
+```json
+{"id": "mouse", "name": "Wireless Mouse", "price": 850000, "stock": 12, "category": "Accessories"}
+```
+
+`category` is optional; products without it are listed under **Other**.
 
 ## Project Structure
 

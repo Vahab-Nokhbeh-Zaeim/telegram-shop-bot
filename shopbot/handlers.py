@@ -48,6 +48,7 @@ class ShopBot:
             "/checkout": self._checkout,
             "/clear": self._clear,
             "/search": self._search,
+            "/categories": self._categories,
         }
         handler = routes.get(command, self._unknown)
         return handler(chat_id, msg)
@@ -57,6 +58,7 @@ class ShopBot:
         text = (
             f"Hi {name}! 👋 Welcome to the shop.\n\n"
             "/catalog – browse products\n"
+            "/categories – browse by category\n"
             "/search &lt;name&gt; – find a product\n"
             "/cart – view your cart\n"
             "/checkout – place your order\n"
@@ -84,14 +86,28 @@ class ShopBot:
         results = self.catalog.search(parts[1])
         if not results:
             return [message(chat_id, f"No products found for “{query}”.")]
-        lines = [f"<b>Results for “{query}”</b>"]
+        return [self._product_list(chat_id, f"Results for “{query}”", results)]
+
+    def _categories(self, chat_id: int, msg: dict) -> list[Action]:
+        categories = self.catalog.categories()
+        if not categories:
+            return [message(chat_id, "There are no products yet.")]
+        # Buttons carry the category index: callback data is limited to 64 bytes.
+        keyboard = [
+            [{"text": f"{name} ({len(self.catalog.by_category(name))})", "callback_data": f"cat:{index}"}]
+            for index, name in enumerate(categories)
+        ]
+        return [message(chat_id, "<b>Choose a category</b>", keyboard)]
+
+    def _product_list(self, chat_id: int, title: str, products: list) -> Action:
+        lines = [f"<b>{title}</b>"]
         keyboard = []
-        for product in results:
+        for product in products:
             status = format_price(product.price) if product.in_stock else "out of stock"
             lines.append(f"• {product.name} – {status}")
             if product.in_stock:
                 keyboard.append([{"text": f"Add {product.name}", "callback_data": f"add:{product.id}"}])
-        return [message(chat_id, "\n".join(lines), keyboard)]
+        return message(chat_id, "\n".join(lines), keyboard)
 
     def _cart(self, chat_id: int, msg: dict) -> list[Action]:
         if self.carts.is_empty(chat_id):
@@ -121,6 +137,8 @@ class ShopBot:
         chat_id = query.get("message", {}).get("chat", {}).get("id")
         data = query.get("data", "")
         answer = Action("answer_callback", {"callback_id": query.get("id", "")})
+        if chat_id is not None and data.startswith("cat:"):
+            return [answer, *self._show_category(chat_id, data.removeprefix("cat:"))]
         if chat_id is None or not data.startswith("add:"):
             return [answer]
         product = self.catalog.get(data.removeprefix("add:"))
@@ -129,3 +147,10 @@ class ShopBot:
         else:
             answer.params["text"] = "Sorry, this product is not available"
         return [answer]
+
+    def _show_category(self, chat_id: int, index_text: str) -> list[Action]:
+        categories = self.catalog.categories()
+        if not index_text.isdigit() or int(index_text) >= len(categories):
+            return [message(chat_id, "This category is no longer available. Send /categories again.")]
+        name = categories[int(index_text)]
+        return [self._product_list(chat_id, html.escape(name), self.catalog.by_category(name))]

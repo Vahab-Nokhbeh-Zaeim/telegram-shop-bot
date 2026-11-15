@@ -105,6 +105,38 @@ class ShopBotTests(unittest.TestCase):
         self.assertIn("No products found", action.params["text"])
         self.assertIn("&lt;laptop&gt;", action.params["text"])
 
+    def test_categories_shows_a_button_per_category(self) -> None:
+        catalog = Catalog([
+            Product("mouse", "Mouse", 100, 5, "Accessories"),
+            Product("pad", "Mouse Pad", 20, 3, "Accessories"),
+            Product("speaker", "Speaker", 300, 2, "Audio"),
+        ])
+        action = ShopBot(catalog).handle(text_update(1, "/categories"))[0]
+        buttons = [row[0] for row in action.params["reply_markup"]["inline_keyboard"]]
+        self.assertEqual([b["text"] for b in buttons], ["Accessories (2)", "Audio (1)"])
+        self.assertEqual([b["callback_data"] for b in buttons], ["cat:0", "cat:1"])
+
+    def test_category_button_lists_its_products(self) -> None:
+        catalog = Catalog([
+            Product("mouse", "Mouse", 100, 5, "Accessories"),
+            Product("speaker", "Speaker", 300, 2, "Audio"),
+        ])
+        update = {"callback_query": {"id": "q2", "data": "cat:1", "message": {"chat": {"id": 1}}}}
+        answer, products = ShopBot(catalog).handle(update)
+        self.assertEqual(answer.method, "answer_callback")
+        self.assertIn("Speaker", products.params["text"])
+        self.assertNotIn("Mouse", products.params["text"])
+        self.assertEqual(products.params["reply_markup"]["inline_keyboard"][0][0]["callback_data"], "add:speaker")
+
+    def test_invalid_category_button(self) -> None:
+        update = {"callback_query": {"id": "q3", "data": "cat:99", "message": {"chat": {"id": 1}}}}
+        actions = self.bot.handle(update)
+        self.assertIn("no longer available", actions[1].params["text"])
+
+    def test_categories_with_empty_catalog(self) -> None:
+        action = ShopBot(Catalog([])).handle(text_update(1, "/categories"))[0]
+        self.assertIn("no products", action.params["text"])
+
     def test_unknown_command(self) -> None:
         actions = self.bot.handle(text_update(1, "hello"))
         self.assertIn("did not understand", actions[0].params["text"])

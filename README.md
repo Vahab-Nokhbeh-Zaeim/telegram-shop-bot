@@ -23,6 +23,7 @@ Built with **pure Python 3.12** and the Telegram Bot API, with **no third-party 
 |---|---|
 | `/start` | Welcome message and list of commands |
 | `/catalog` | Browse products and add them to the cart |
+| `/categories` | Pick a category from buttons and see its products |
 | `/search <name>` | Find products by name (case-insensitive) |
 | `/cart` | View the cart and total price |
 | `/checkout` | Place the order |

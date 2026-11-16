@@ -3,10 +3,7 @@
 from collections import defaultdict
 
 from .catalog import Catalog
-
-
-def format_price(amount: int) -> str:
-    return f"{amount:,} Toman"
+from .messages import fa_number, format_price, t
 
 
 class CartStore:
@@ -47,6 +44,9 @@ class CartStore:
         self._carts.pop(chat_id, None)
 
     def summary(self, chat_id: int) -> str:
-        lines = [f"• {name} × {qty} = {format_price(line)}" for name, qty, line in self.items(chat_id)]
-        lines.append(f"\n<b>Total: {format_price(self.total(chat_id))}</b>")
+        lines = [
+            t("cart_line", name=name, quantity=fa_number(qty), total=format_price(line))
+            for name, qty, line in self.items(chat_id)
+        ]
+        lines.append(t("cart_total", total=format_price(self.total(chat_id))))
         return "\n".join(lines)

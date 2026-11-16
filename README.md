@@ -2,7 +2,7 @@
 
 A lightweight Telegram bot for small online shops. Customers browse products, add them to a cart with inline buttons and place orders — and the shop owner gets a notification for every new order.
 
-Built with **pure Python 3.12** and the Telegram Bot API, with **no third-party dependencies**.
+Built with **pure Python 3.12** and the Telegram Bot API, with **no third-party dependencies**. The bot speaks **Persian** out of the box, and every text lives in one file so it can be translated easily.
 
 ![tests](https://github.com/Vahab-Nokhbeh-Zaeim/telegram-shop-bot/actions/workflows/tests.yml/badge.svg)
 
@@ -14,6 +14,7 @@ Built with **pure Python 3.12** and the Telegram Bot API, with **no third-party 
 - Per-user carts with stock validation
 - Checkout with order numbers and an order summary
 - Order notifications sent to an admin chat
+- Persian interface with Persian digits and prices (`۸۵۰٬۰۰۰ تومان`), all texts in `shopbot/messages.py`
 - Long polling with automatic retry on network errors
 - Business logic separated from the API layer and covered by unit tests
 
@@ -52,10 +53,14 @@ python -m shopbot
 Products live in `data/products.json`; edit it or point `CATALOG_PATH` to your own file:
 
 ```json
-{"id": "mouse", "name": "Wireless Mouse", "price": 850000, "stock": 12, "category": "Accessories"}
+{"id": "mouse", "name": "ماوس بی‌سیم", "price": 850000, "stock": 12, "category": "لوازم جانبی"}
 ```
 
-`category` is optional; products without it are listed under **Other**.
+`category` is optional; products without it are listed under **سایر** (Other).
+
+### Changing the language
+
+All messages are in the `TEXT` dictionary in `shopbot/messages.py`. Translate the values (keep the keys and the `{placeholders}`) to run the bot in another language.
 
 ## Project Structure
 
@@ -63,7 +68,8 @@ Products live in `data/products.json`; edit it or point `CATALOG_PATH` to your o
 shopbot/
   api.py        Telegram Bot API client (urllib)
   catalog.py    Product model and catalog loader
-  cart.py       Per-chat carts and price formatting
+  cart.py       Per-chat carts
+  messages.py   All user-facing texts, Persian digits and price formatting
   handlers.py   Commands and callbacks -> actions
   __main__.py   Long polling loop
 data/products.json

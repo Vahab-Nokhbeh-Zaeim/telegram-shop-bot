@@ -8,8 +8,9 @@ import html
 from dataclasses import dataclass, field
 from itertools import count
 
-from .cart import CartStore, format_price
+from .cart import CartStore
 from .catalog import Catalog
+from .messages import fa_number, format_price, t
 
 
 @dataclass
@@ -54,84 +55,86 @@ class ShopBot:
         return handler(chat_id, msg)
 
     def _start(self, chat_id: int, msg: dict) -> list[Action]:
-        name = msg.get("from", {}).get("first_name", "there")
-        text = (
-            f"Hi {name}! 👋 Welcome to the shop.\n\n"
-            "/catalog – browse products\n"
-            "/categories – browse by category\n"
-            "/search &lt;name&gt; – find a product\n"
-            "/cart – view your cart\n"
-            "/checkout – place your order\n"
-            "/clear – empty your cart"
-        )
-        return [message(chat_id, text)]
+        name = msg.get("from", {}).get("first_name") or t("default_name")
+        return [message(chat_id, t("start", name=html.escape(name)))]
 
     def _catalog(self, chat_id: int, msg: dict) -> list[Action]:
         keyboard = []
-        lines = ["<b>Products</b>"]
+        lines = [f"<b>{t('catalog_title')}</b>"]
         for category in self.catalog.categories():
             lines.append(f"\n<b>{html.escape(category)}</b>")
             for product in self.catalog.by_category(category):
-                status = format_price(product.price) if product.in_stock else "out of stock"
-                lines.append(f"• {product.name} – {status}")
+                lines.append(self._product_line(product))
                 if product.in_stock:
-                    keyboard.append([{"text": f"Add {product.name}", "callback_data": f"add:{product.id}"}])
+                    keyboard.append([self._add_button(product)])
         return [message(chat_id, "\n".join(lines), keyboard)]
 
     def _search(self, chat_id: int, msg: dict) -> list[Action]:
         parts = (msg.get("text") or "").split(maxsplit=1)
         if len(parts) < 2:
-            return [message(chat_id, "Usage: /search mouse")]
+            return [message(chat_id, t("search_usage"))]
         query = html.escape(parts[1])
         results = self.catalog.search(parts[1])
         if not results:
-            return [message(chat_id, f"No products found for “{query}”.")]
-        return [self._product_list(chat_id, f"Results for “{query}”", results)]
+            return [message(chat_id, t("search_none", query=query))]
+        return [self._product_list(chat_id, t("search_title", query=query), results)]
 
     def _categories(self, chat_id: int, msg: dict) -> list[Action]:
         categories = self.catalog.categories()
         if not categories:
-            return [message(chat_id, "There are no products yet.")]
+            return [message(chat_id, t("categories_empty"))]
         # Buttons carry the category index: callback data is limited to 64 bytes.
         keyboard = [
-            [{"text": f"{name} ({len(self.catalog.by_category(name))})", "callback_data": f"cat:{index}"}]
+            [{
+                "text": t("category_button", name=name, count=fa_number(len(self.catalog.by_category(name)))),
+                "callback_data": f"cat:{index}",
+            }]
             for index, name in enumerate(categories)
         ]
-        return [message(chat_id, "<b>Choose a category</b>", keyboard)]
+        return [message(chat_id, f"<b>{t('categories_title')}</b>", keyboard)]
 
     def _product_list(self, chat_id: int, title: str, products: list) -> Action:
         lines = [f"<b>{title}</b>"]
         keyboard = []
         for product in products:
-            status = format_price(product.price) if product.in_stock else "out of stock"
-            lines.append(f"• {product.name} – {status}")
+            lines.append(self._product_line(product))
             if product.in_stock:
-                keyboard.append([{"text": f"Add {product.name}", "callback_data": f"add:{product.id}"}])
+                keyboard.append([self._add_button(product)])
         return message(chat_id, "\n".join(lines), keyboard)
+
+    @staticmethod
+    def _product_line(product) -> str:
+        status = format_price(product.price) if product.in_stock else t("out_of_stock")
+        return t("product_line", name=product.name, status=status)
+
+    @staticmethod
+    def _add_button(product) -> dict:
+        return {"text": t("add_button", name=product.name), "callback_data": f"add:{product.id}"}
 
     def _cart(self, chat_id: int, msg: dict) -> list[Action]:
         if self.carts.is_empty(chat_id):
-            return [message(chat_id, "Your cart is empty. Use /catalog to add products.")]
-        return [message(chat_id, "<b>Your cart</b>\n" + self.carts.summary(chat_id))]
+            return [message(chat_id, t("cart_empty"))]
+        return [message(chat_id, f"<b>{t('cart_title')}</b>\n" + self.carts.summary(chat_id))]
 
     def _checkout(self, chat_id: int, msg: dict) -> list[Action]:
         if self.carts.is_empty(chat_id):
-            return [message(chat_id, "Your cart is empty.")]
-        order_id = next(self._order_ids)
+            return [message(chat_id, t("checkout_empty"))]
+        order_id = fa_number(next(self._order_ids))
         summary = self.carts.summary(chat_id)
-        actions = [message(chat_id, f"✅ Order #{order_id} placed!\n\n{summary}\n\nWe will contact you soon.")]
+        actions = [message(chat_id, t("order_placed", order_id=order_id, summary=summary))]
         if self.admin_chat_id is not None:
-            customer = msg.get("from", {}).get("username") or chat_id
-            actions.append(message(self.admin_chat_id, f"🛒 New order #{order_id} from {customer}\n\n{summary}"))
+            username = msg.get("from", {}).get("username")
+            customer = f"@{username}" if username else fa_number(chat_id)
+            actions.append(message(self.admin_chat_id, t("admin_new_order", order_id=order_id, customer=customer, summary=summary)))
         self.carts.clear(chat_id)
         return actions
 
     def _clear(self, chat_id: int, msg: dict) -> list[Action]:
         self.carts.clear(chat_id)
-        return [message(chat_id, "Your cart has been emptied.")]
+        return [message(chat_id, t("cleared"))]
 
     def _unknown(self, chat_id: int, msg: dict) -> list[Action]:
-        return [message(chat_id, "Sorry, I did not understand that. Send /start to see the commands.")]
+        return [message(chat_id, t("unknown"))]
 
     def _handle_callback(self, query: dict) -> list[Action]:
         chat_id = query.get("message", {}).get("chat", {}).get("id")
@@ -143,14 +146,14 @@ class ShopBot:
             return [answer]
         product = self.catalog.get(data.removeprefix("add:"))
         if product and self.carts.add(chat_id, product.id):
-            answer.params["text"] = f"{product.name} added to your cart"
+            answer.params["text"] = t("added", name=product.name)
         else:
-            answer.params["text"] = "Sorry, this product is not available"
+            answer.params["text"] = t("unavailable")
         return [answer]
 
     def _show_category(self, chat_id: int, index_text: str) -> list[Action]:
         categories = self.catalog.categories()
         if not index_text.isdigit() or int(index_text) >= len(categories):
-            return [message(chat_id, "This category is no longer available. Send /categories again.")]
+            return [message(chat_id, t("category_missing"))]
         name = categories[int(index_text)]
         return [self._product_list(chat_id, html.escape(name), self.catalog.by_category(name))]

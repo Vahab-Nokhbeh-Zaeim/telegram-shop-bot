@@ -4,6 +4,8 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
+from .messages import DEFAULT_CATEGORY
+
 
 @dataclass(frozen=True)
 class Product:
@@ -11,7 +13,7 @@ class Product:
     name: str
     price: int
     stock: int
-    category: str = "Other"
+    category: str = DEFAULT_CATEGORY
 
     @property
     def in_stock(self) -> bool:

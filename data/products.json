@@ -1,7 +1,7 @@
 [
-  {"id": "mouse", "name": "Wireless Mouse", "price": 850000, "stock": 12, "category": "Accessories"},
-  {"id": "keyboard", "name": "Mechanical Keyboard", "price": 3200000, "stock": 5, "category": "Accessories"},
-  {"id": "headset", "name": "Gaming Headset", "price": 2100000, "stock": 8, "category": "Audio"},
-  {"id": "speaker", "name": "Bluetooth Speaker", "price": 1750000, "stock": 6, "category": "Audio"},
-  {"id": "webcam", "name": "HD Webcam", "price": 1450000, "stock": 0, "category": "Video"}
+  {"id": "mouse", "name": "ماوس بی‌سیم", "price": 850000, "stock": 12, "category": "لوازم جانبی"},
+  {"id": "keyboard", "name": "کیبورد مکانیکی", "price": 3200000, "stock": 5, "category": "لوازم جانبی"},
+  {"id": "headset", "name": "هدست گیمینگ", "price": 2100000, "stock": 8, "category": "صوتی"},
+  {"id": "speaker", "name": "اسپیکر بلوتوثی", "price": 1750000, "stock": 6, "category": "صوتی"},
+  {"id": "webcam", "name": "وب‌کم HD", "price": 1450000, "stock": 0, "category": "تصویری"}
 ]

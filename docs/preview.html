@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<title>Telegram Shop Bot preview</title>
+<style>
+  html, body { margin: 0; background: #0e1621; font-family: Tahoma, "Segoe UI", sans-serif; }
+  body { direction: ltr; }
+  .phone { direction: rtl; width: 420px; background: #0e1621; padding-bottom: 16px; }
+  .top { background: #17212b; color: #fff; padding: 14px 18px; display: flex; gap: 12px; align-items: center; }
+  .avatar { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, #5eb5f7, #2b8ae2);
+            display: grid; place-items: center; font-weight: bold; }
+  .top small { display: block; color: #7f91a4; font-size: 12px; }
+  .chat { padding: 12px 12px 0; display: flex; flex-direction: column; gap: 8px; }
+  .msg { display: flex; flex-direction: column; max-width: 82%; }
+  .msg.user { align-self: flex-end; }
+  .msg.bot { align-self: flex-start; }
+  .bubble { padding: 8px 12px; border-radius: 14px; color: #fff; font-size: 14px; line-height: 1.7; }
+  .user .bubble { background: #2b5278; border-bottom-left-radius: 4px; direction: ltr; text-align: left; }
+  .bot .bubble { background: #182533; border-bottom-right-radius: 4px; }
+  .keyboard { display: grid; gap: 4px; margin-top: 4px; }
+  .btn { background: rgba(255,255,255,.08); color: #fff; text-align: center; padding: 7px; border-radius: 8px; font-size: 13px; }
+  .toast { align-self: center; background: rgba(0,0,0,.55); color: #fff; font-size: 12px; padding: 4px 12px; border-radius: 12px; }
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="top"><div class="avatar">🛒</div><div>فروشگاه<small>bot</small></div></div>
+  <div class="chat">
+<div class="msg user"><div class="bubble">/categories</div></div>
+<div class="msg bot"><div class="bubble"><b>یک دسته‌بندی را انتخاب کن</b></div><div class="keyboard"><div class="btn">لوازم جانبی (۲)</div><div class="btn">صوتی (۲)</div><div class="btn">تصویری (۱)</div></div></div>
+<div class="msg bot"><div class="bubble"><b>صوتی</b><br>• هدست گیمینگ – ۲٬۱۰۰٬۰۰۰ تومان<br>• اسپیکر بلوتوثی – ۱٬۷۵۰٬۰۰۰ تومان</div><div class="keyboard"><div class="btn">➕ افزودن هدست گیمینگ</div><div class="btn">➕ افزودن اسپیکر بلوتوثی</div></div></div>
+<div class="toast">هدست گیمینگ به سبد خرید اضافه شد</div>
+<div class="msg user"><div class="bubble">/search ماوس</div></div>
+<div class="msg bot"><div class="bubble"><b>نتایج جستجوی «ماوس»</b><br>• ماوس بی‌سیم – ۸۵۰٬۰۰۰ تومان</div><div class="keyboard"><div class="btn">➕ افزودن ماوس بی‌سیم</div></div></div>
+<div class="toast">ماوس بی‌سیم به سبد خرید اضافه شد</div>
+<div class="msg user"><div class="bubble">/checkout</div></div>
+<div class="msg bot"><div class="bubble">✅ سفارش شماره ۱۰۰۱ ثبت شد!<br><br>• هدست گیمینگ × ۱ = ۲٬۱۰۰٬۰۰۰ تومان<br>• ماوس بی‌سیم × ۱ = ۸۵۰٬۰۰۰ تومان<br><br><b>جمع کل: ۲٬۹۵۰٬۰۰۰ تومان</b><br><br>به‌زودی با شما تماس می‌گیریم.</div></div>
+  </div>
+</div>
+</body>
+</html>

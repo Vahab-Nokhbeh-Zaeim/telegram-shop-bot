@@ -6,6 +6,11 @@ Built with **pure Python 3.12** and the Telegram Bot API, with **no third-party 
 
 ![tests](https://github.com/Vahab-Nokhbeh-Zaeim/telegram-shop-bot/actions/workflows/tests.yml/badge.svg)
 
+<p align="center">
+  <img src="docs/preview.png" alt="Chat preview: browsing categories, searching, adding to the cart and checking out" width="360">
+</p>
+<p align="center"><sub>Preview generated from the bot's real replies with <code>python tools/render_preview.py</code></sub></p>
+
 ## Features
 
 - Product catalog loaded from a JSON file, grouped by category
@@ -73,6 +78,7 @@ shopbot/
   handlers.py   Commands and callbacks -> actions
   __main__.py   Long polling loop
 data/products.json
+tools/render_preview.py   Builds docs/preview.html from the bot's real replies
 tests/          Unit tests
 ```
 
